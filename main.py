@@ -1,119 +1,84 @@
-import pyaes
 import json
+import pyaes
 from js import Response
 
-# 这里是你的前端图形界面 HTML 代码
-HTML_CONTENT = """
-<!DOCTYPE html>
+# 纯静态 HTML 界面
+HTML_CONTENT = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AES 加解密工具</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; }
-        .card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: #333; }
-        label { display: block; margin-top: 12px; font-weight: bold; color: #555; }
-        textarea, input { width: 100%; margin-top: 6px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        button { width: 100%; margin-top: 18px; padding: 12px; background-color: #0070f3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
-        button:hover { background-color: #0051a2; }
-        .result { margin-top: 20px; background: #eef2ff; padding: 15px; border-radius: 4px; border: 1px solid #c7d2fe; word-break: break-all; }
+        body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+        input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; box-sizing: border-box; }
+        button { background: #0070f3; color: white; border: none; cursor: pointer; }
+        .res { margin-top: 15px; background: #f0f0f0; padding: 10px; word-break: break-all; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>AES 加解密工具</h2>
-        <label>密钥 (Key - 16位字符):</label>
-        <input type="text" id="key" value="1234567890123456">
-        
-        <label>待加密明文:</label>
-        <textarea id="text" rows="4">Hello, Cloudflare Workers!</textarea>
-        
-        <button onclick="doEncrypt()">执行 AES 加密</button>
-        
-        <div class="result" id="result" style="display:none;"></div>
-    </div>
+    <h3>AES 加密工具 (Worker)</h3>
+    <input id="key" value="1234567890123456" placeholder="密钥(16位)">
+    <textarea id="text" placeholder="输入要加密的内容">Hello World</textarea>
+    <button onclick="encrypt()">点击加密</button>
+    <div id="out" class="res"></div>
 
     <script>
-        async function doEncrypt() {
+        async function encrypt() {
             const key = document.getElementById('key').value;
             const text = document.getElementById('text').value;
-            const resDiv = document.getElementById('result');
-            
-            resDiv.style.display = 'block';
-            resDiv.innerHTML = '正在加密...';
-
-            try {
-                const res = await fetch('/api/encrypt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key, text })
-                });
-                
-                const data = await res.json();
-                if (data.status === 'success') {
-                    resDiv.innerHTML = '<b>加密成功 (Hex):</b><br><code>' + data.data.encrypted_hex + '</code>';
-                } else {
-                    resDiv.innerHTML = '<span style="color:red;">错误: ' + data.message + '</span>';
-                }
-            } catch (err) {
-                resDiv.innerHTML = '<span style="color:red;">请求失败，请检查网络</span>';
-            }
+            const res = await fetch('/api/encrypt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ key, text })
+            });
+            const data = await res.json();
+            document.getElementById('out').innerText = data.result || data.error;
         }
     </script>
 </body>
-</html>
-"""
+</html>"""
 
 async def on_fetch(request, env):
+    # 安全获取 URL
     try:
-        # 获取 JS Request 对象的 url 字符串
-        url_str = str(request.url)
-        
-        # 1. 如果请求路径包含 /api/encrypt，走后端加解密接口
-        if "/api/encrypt" in url_str:
-            body_text = await request.text()
-            body = json.loads(body_text) if body_text else {}
-            
-            text_to_encrypt = body.get("text", "Hello")
-            custom_key = body.get("key", "1234567890123456")
-            
-            # 确保 Key 为 16 字节
-            key_bytes = custom_key.encode('utf-8')
-            if len(key_bytes) != 16:
-                key_bytes = key_bytes.ljust(16, b'\0')[:16]
+        url = str(request.url)
+    except Exception as e:
+        url = ""
 
-            # 执行 AES-CTR 加密
-            aes_encryptor = pyaes.AESModeOfOperationCTR(key_bytes)
-            ciphertext = aes_encryptor.encrypt(text_to_encrypt)
+    # API 路径处理
+    if "/api/encrypt" in url:
+        try:
+            body_raw = await request.text()
+            data = json.loads(body_raw) if body_raw else {}
+            
+            text = data.get("text", "")
+            key_str = data.get("key", "1234567890123456")
+            
+            # 处理 16 字节 Key
+            key_bytes = key_str.encode('utf-8')
+            if len(key_bytes) < 16:
+                key_bytes = key_bytes.ljust(16, b'\0')
+            else:
+                key_bytes = key_bytes[:16]
 
-            res_payload = {
-                "status": "success",
-                "data": {
-                    "original": text_to_encrypt,
-                    "encrypted_hex": ciphertext.hex()
-                }
-            }
+            # 执行加密
+            aes = pyaes.AESModeOfOperationCTR(key_bytes)
+            cipher = aes.encrypt(text)
+
             return Response.new(
-                json.dumps(res_payload, ensure_ascii=False),
-                headers={"content-type": "application/json; charset=UTF-8"}
+                json.dumps({"result": cipher.hex()}),
+                headers={"content-type": "application/json"}
+            )
+        except Exception as err:
+            return Response.new(
+                json.dumps({"error": str(err)}),
+                headers={"content-type": "application/json"},
+                status=500
             )
 
-        # 2. 访问根目录或其他路径时，直接返回前端网页 (HTML)
-        return Response.new(
-            HTML_CONTENT,
-            headers={"content-type": "text/html; charset=UTF-8"}
-        )
-
-    except Exception as e:
-        # 捕获全局异常，避免抛出 Error 1101
-        error_res = {
-            "status": "error",
-            "message": str(e)
-        }
-        return Response.new(
-            json.dumps(error_res, ensure_ascii=False),
-            headers={"content-type": "application/json; charset=UTF-8"},
-            status=500
-        )
+    # 默认返回 HTML
+    return Response.new(
+        HTML_CONTENT,
+        headers={"content-type": "text/html; charset=UTF-8"}
+    )
