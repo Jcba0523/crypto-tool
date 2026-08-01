@@ -35,7 +35,11 @@ def pkcs7_pad(data: bytes) -> bytes:
     return data + bytes([pad_len] * pad_len)
 
 def pkcs7_unpad(data: bytes) -> bytes:
+    if not data:
+        raise ValueError("数据为空")
     pad_len = data[-1]
+    if pad_len < 1 or pad_len > 16:
+        raise ValueError("密码错误或数据损坏")
     return data[:-pad_len]
 
 def aes_encrypt(data: str, password: str, times: int) -> str:
