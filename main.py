@@ -1,6 +1,6 @@
 import json
 import pyaes
-# 注意：不要 import Response，直接从 js 作用域或 worker 原生对象交互
+from js import Response, Object
 
 HTML_CONTENT = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -56,11 +56,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 </body>
 </html>"""
 
-# 在 JS 环境中获取 Response 构造函数
-from js import Response, Object
-
 def make_response(body_content, status=200, content_type="text/html; charset=UTF-8"):
-    # 安全构造 Header 对象，避免直接传递 dict 给 JS 导致的类型转换错误
     headers = Object.new()
     headers['content-type'] = content_type
     
@@ -70,11 +66,11 @@ def make_response(body_content, status=200, content_type="text/html; charset=UTF
     
     return Response.new(body_content, options)
 
+# 确保暴露 on_fetch 函数
 async def on_fetch(request, env):
     try:
         url = str(request.url)
 
-        # 1. API 接口请求处理
         if "/api/encrypt" in url:
             body_raw = await request.text()
             data = json.loads(body_raw) if body_raw else {}
@@ -82,24 +78,28 @@ async def on_fetch(request, env):
             text = data.get("text", "")
             key_str = data.get("key", "1234567890123456")
             
-            # 补全或截断 Key 为 16 字节
             key_bytes = key_str.encode('utf-8')
             if len(key_bytes) < 16:
                 key_bytes = key_bytes.ljust(16, b'\0')
             else:
                 key_bytes = key_bytes[:16]
 
-            # 执行 pyaes 加密
             aes = pyaes.AESModeOfOperationCTR(key_bytes)
             cipher = aes.encrypt(text)
 
             res_json = json.dumps({"result": cipher.hex()})
             return make_response(res_json, status=200, content_type="application/json")
 
-        # 2. 默认路径返回前端 GUI 页面
         return make_response(HTML_CONTENT, status=200, content_type="text/html; charset=UTF-8")
 
     except Exception as e:
-        # 异常兜底，强制返回 JSON 格式的错误信息，绝不抛出 1101
-        err_json = json.dumps({"error": f"Internal Error: {str(e)}"})
+        err_json = json.dumps({"error": str(e)})
         return make_response(err_json, status=500, content_type="application/json")
+
+# 必须加上这条导出，告诉 Cloudflare 这是默认入口
+class DefaultHandler:
+    async def fetch(self, request, env, ctx):
+        return await on_fetch(request, env)
+
+# 兼容两种 Cloudflare 导出语法
+__all__ = ["on_fetch"]
