@@ -1,0 +1,4 @@
+name = "crypto-tool"
+main = "main.py"
+compatibility_date = "2025-07-01"
+compatibility_flags = ["python_workers"]
