@@ -1,0 +1,17 @@
+[project]
+name = "crypto-tool"
+version = "1.0.0"
+description = "Base64 & AES encryption tool for Cloudflare Workers"
+dependencies = [
+    "fastapi>=0.115.0",
+    "pyaes>=1.6.1",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.wrangler]
+compatibility_date = "2025-07-01"
+compatibility_flags = ["python_workers"]
+main = "main:app"
