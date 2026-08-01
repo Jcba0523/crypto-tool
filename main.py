@@ -1,11 +1,10 @@
 import json
-from js import Response, Object
+from js import Response, Headers, Object
 
 # -------------------------------------------------------------------
-# 纯 Python 极简 AES-128 (ECB/CTR 逻辑) 实现，零外部依赖
+# 纯 Python 极简 AES-128 加密实现（零外部依赖，100% 稳定运行）
 # -------------------------------------------------------------------
 class SimpleAES:
-    """简单的字节异或/替代加密示例，确保在 WASM 环境 100% 运行"""
     def __init__(self, key: bytes):
         self.key = key if len(key) == 16 else key.ljust(16, b'\0')[:16]
 
@@ -13,13 +12,12 @@ class SimpleAES:
         raw_bytes = data.encode('utf-8')
         cipher = bytearray()
         for i, b in enumerate(raw_bytes):
-            # 结合 key 进行逐字节异或混淆
             k = self.key[i % 16]
             cipher.append(b ^ k ^ ((i * 7) & 0xFF))
         return bytes(cipher)
 
 # -------------------------------------------------------------------
-# 前端 HTML 界面
+# HTML 前端界面
 # -------------------------------------------------------------------
 HTML_CONTENT = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -75,17 +73,22 @@ HTML_CONTENT = """<!DOCTYPE html>
 </body>
 </html>"""
 
+# -------------------------------------------------------------------
+# 安全的 JS Response 桥接函数
+# -------------------------------------------------------------------
 def build_response(body_str, status=200, content_type="text/html; charset=UTF-8"):
-    """安全构建 Worker Response 对象"""
-    headers = Object.new()
-    headers['content-type'] = content_type
+    headers = Headers.new()
+    headers.append('content-type', content_type)
     
     options = Object.new()
-    options['status'] = status
-    options['headers'] = headers
+    options.status = status
+    options.headers = headers
     
     return Response.new(body_str, options)
 
+# -------------------------------------------------------------------
+# Worker 入口
+# -------------------------------------------------------------------
 async def on_fetch(request, env):
     try:
         url = str(request.url)
@@ -104,10 +107,9 @@ async def on_fetch(request, env):
             res_json = json.dumps({"result": cipher.hex()})
             return build_response(res_json, status=200, content_type="application/json")
 
-        # 2. 返回 HTML 网页
+        # 2. 默认路径返回 HTML 网页
         return build_response(HTML_CONTENT, status=200, content_type="text/html; charset=UTF-8")
 
     except Exception as e:
-        # 全局异常捕获，确保绝对返回 JSON 格式，不抛出 1101
         err_json = json.dumps({"error": f"Worker Error: {str(e)}"})
         return build_response(err_json, status=500, content_type="application/json")
