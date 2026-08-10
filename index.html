@@ -87,37 +87,52 @@
         }
 
         function handleAction(action) {
-            const keyStr = document.getElementById('key').value;
-            const rounds = parseInt(document.getElementById('rounds').value) || 1;
-            const inputArea = document.getElementById('text').value;
-            
-            const resultBox = document.getElementById('resultBox');
-            const resTitle = document.getElementById('resTitle');
-            const resContent = document.getElementById('resContent');
+    const keyStr = document.getElementById('key').value;
+    const rounds = parseInt(document.getElementById('rounds').value) || 1;
+    const inputArea = document.getElementById('text').value;
+    
+    const resultBox = document.getElementById('resultBox');
+    const resTitle = document.getElementById('resTitle');
+    const resContent = document.getElementById('resContent');
 
-            if (!inputArea) return alert("请输入内容");
+    if (!inputArea) return alert("请输入内容");
 
-            try {
-                const aes = new LocalAES(keyStr);
-                const encoder = new TextEncoder();
-                const decoder = new TextDecoder();
+    try {
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
 
-                if (action === 'encrypt') {
-                    let currentData = encoder.encode(inputArea);
-                    for (let i = 0; i < rounds; i++) currentData = aes.transform(currentData);
-                    resTitle.innerText = `🔒 加密成功 (迭代 ${rounds} 轮):`;
-                    resContent.innerText = bytesToHex(currentData);
-                } else {
-                    let currentData = hexToBytes(inputArea);
-                    for (let i = 0; i < rounds; i++) currentData = aes.transform(currentData);
-                    resTitle.innerText = `🔓 解密成功:`;
-                    resContent.innerText = decoder.decode(currentData);
-                }
-                resultBox.style.display = 'block';
-            } catch (err) {
-                alert("处理失败: " + err.message);
+        if (action === 'encrypt') {
+            let currentData = encoder.encode(inputArea);
+
+            // 动态迭代：每一轮使用由上一轮结果派生/动态变化的 Key，避免异或抵消
+            for (let i = 0; i < rounds; i++) {
+                // 将当前轮次 i 混入 key 中，确保每一轮的加密密钥都不一样
+                const dynamicKey = `${keyStr}_round_${i}`;
+                const aes = new LocalAES(dynamicKey);
+                currentData = aes.transform(currentData);
             }
+
+            resTitle.innerText = `🔒 加密成功 (已迭代 ${rounds} 轮):`;
+            resContent.innerText = bytesToHex(currentData);
+
+        } else {
+            let currentData = hexToBytes(inputArea);
+
+            // 解密：必须完全按照逆序 (从 rounds-1 倒推到 0) 依次解密
+            for (let i = rounds - 1; i >= 0; i--) {
+                const dynamicKey = `${keyStr}_round_${i}`;
+                const aes = new LocalAES(dynamicKey);
+                currentData = aes.transform(currentData);
+            }
+
+            resTitle.innerText = `🔓 解密成功:`;
+            resContent.innerText = decoder.decode(currentData);
         }
+        resultBox.style.display = 'block';
+    } catch (err) {
+        alert("处理失败，请检查密文或密钥是否正确: " + err.message);
+    }
+}
     </script>
 </body>
 </html>
