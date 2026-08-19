@@ -3,163 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>纯前端多功能安全工具箱</title>
+    <title>纯前端安全工具箱</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 600px;
-            margin: 30px auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .card {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-            margin-bottom: 20px;
-        }
-        h2 {
-            margin-top: 0;
-            font-size: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-        .privacy-badge {
-            display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-bottom: 16px;
-        }
-        .form-group {
-            margin-top: 14px;
-        }
-        label {
-            font-size: 14px;
-            font-weight: bold;
-            color: #444;
-            display: block;
-            margin-bottom: 6px;
-        }
-        input, textarea, button {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        textarea {
-            resize: vertical;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-        }
-        button {
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .btn-blue {
-            background-color: #0070f3;
-            color: white;
-        }
-        .btn-blue:hover {
-            background-color: #0051a2;
-        }
-        .btn-green {
-            background-color: #10b981;
-            color: white;
-        }
-        .btn-green:hover {
-            background-color: #059669;
-        }
-        .res-box {
-            margin-top: 16px;
-            background: #eef2ff;
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid #c7d2fe;
-            word-break: break-all;
-        }
-        .res-title {
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #1e40af;
-            font-size: 13px;
-        }
-        code {
-            font-family: monospace;
-            font-size: 13px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8fafc; color: #334155; display: flex; height: 100vh; overflow: hidden; }
+
+        /* 左侧边栏样式 */
+        .sidebar { width: 240px; background: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
+        .sidebar-title { font-size: 11px; font-weight: 700; color: #94a3b8; padding: 0 20px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .menu-category { margin-bottom: 20px; }
+        .menu-header { font-size: 14px; font-weight: 600; color: #475569; padding: 8px 20px; display: flex; align-items: center; gap: 8px; }
+        .menu-item { display: flex; align-items: center; padding: 8px 20px 8px 36px; font-size: 13px; color: #64748b; text-decoration: none; cursor: pointer; transition: all 0.15s ease; position: relative; }
+        .menu-item::before { content: "-"; margin-right: 6px; color: #94a3b8; }
+        .menu-item:hover { color: #0f172a; background: #f1f5f9; }
+        .menu-item.active { color: #10b981; font-weight: 600; background: #ecfdf5; }
+        .menu-item.active::before { color: #10b981; }
+
+        /* 右侧主内容区 */
+        .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+        .privacy-banner { display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; color: #0369a1; font-size: 12px; padding: 6px 12px; border-radius: 6px; font-weight: 600; margin-bottom: 20px; }
+        
+        .card { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); max-width: 650px; }
+        .card-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        
+        .tool-panel { display: none; }
+        .tool-panel.active { display: block; }
+
+        .form-group { margin-top: 14px; }
+        label { font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px; }
+        input, textarea, button { width: 100%; padding: 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
+        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
+        textarea { resize: vertical; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 18px; }
+        button { border: none; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
+        .btn-green { background-color: #10b981; color: white; }
+        .btn-green:hover { background-color: #059669; }
+
+        .res-box { margin-top: 16px; background: #f8fafc; padding: 14px; border-radius: 6px; border: 1px solid #e2e8f0; word-break: break-all; }
+        .res-title { font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 12px; }
+        code { font-family: monospace; font-size: 13px; color: #0f172a; }
     </style>
 </head>
 <body>
 
-    <div class="privacy-badge">🛡️ 纯客户端计算：所有数据仅在浏览器内存中处理，绝不上传任何服务器</div>
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="sidebar-title">工具导航</div>
 
-    <!-- 模块 1：AES 加解密 -->
-    <div class="card">
-        <h2>🔒 AES 本地加解密</h2>
-        
-        <div class="form-group">
-            <label for="aes-key">密钥 (16字节):</label>
-            <input type="text" id="aes-key" value="1234567890123456">
+        <!-- 编码与解码分类 -->
+        <div class="menu-category">
+            <div class="menu-header">
+                <span>&lt;/&gt;</span> 编码与解码
+            </div>
+            <div class="menu-item active" onclick="switchTool('url-tool', this)">URL 编码/解码</div>
         </div>
 
-        <div class="form-group">
-            <label for="aes-rounds">迭代轮数:</label>
-            <input type="number" id="aes-rounds" min="1" max="1000" value="1">
-        </div>
-
-        <div class="form-group">
-            <label for="aes-text">内容 (加密填明文，解密填 Hex 密文):</label>
-            <textarea id="aes-text" rows="3" placeholder="在此输入内容..."></textarea>
-        </div>
-
-        <div class="btn-group">
-            <button class="btn-blue" onclick="handleAES('encrypt')">🔒 本地加密</button>
-            <button class="btn-green" onclick="handleAES('decrypt')">🔓 本地解密</button>
-        </div>
-
-        <div id="aes-res-box" class="res-box" style="display:none;">
-            <div id="aes-res-title" class="res-title"></div>
-            <code id="aes-res-content"></code>
+        <!-- 加密分类 -->
+        <div class="menu-category">
+            <div class="menu-header">
+                <span>🔑</span> 加密与解密
+            </div>
+            <div class="menu-item" onclick="switchTool('aes-tool', this)">AES 本地加解密</div>
         </div>
     </div>
 
-    <!-- 模块 2：URL 编解码 -->
-    <div class="card">
-        <h2>🌐 URL 编码 / 解码</h2>
-        
-        <div class="form-group">
-            <label for="url-text">内容 (输入需要 Encode 或 Decode 的字符串):</label>
-            <textarea id="url-text" rows="3" placeholder="例如: https://example.com/search?q=测试数据"></textarea>
+    <!-- 右侧内容区域 -->
+    <div class="main-content">
+        <div class="privacy-banner">🛡️ 纯客户端计算：所有数据仅保留在当前浏览器内存中，绝不上报服务器</div>
+
+        <!-- 1. URL 编解码模块 -->
+        <div id="url-tool" class="tool-panel active">
+            <div class="card">
+                <div class="card-title">🌐 URL 编码 / 解码</div>
+                <div class="form-group">
+                    <label>处理内容:</label>
+                    <textarea id="url-text" rows="4" placeholder="例如: https://example.com/search?q=测试"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-blue" onclick="handleURL('encode')">🔗 URL 编码 (Encode)</button>
+                    <button class="btn-green" onclick="handleURL('decode')">🔓 URL 解码 (Decode)</button>
+                </div>
+                <div id="url-res-box" class="res-box" style="display:none;">
+                    <div id="url-res-title" class="res-title"></div>
+                    <code id="url-res-content"></code>
+                </div>
+            </div>
         </div>
 
-        <div class="btn-group">
-            <button class="btn-blue" onclick="handleURL('encode')">🔗 URL 编码 (Encode)</button>
-            <button class="btn-green" onclick="handleURL('decode')">🔓 URL 解码 (Decode)</button>
-        </div>
-
-        <div id="url-res-box" class="res-box" style="display:none;">
-            <div id="url-res-title" class="res-title"></div>
-            <code id="url-res-content"></code>
+        <!-- 2. AES 加解密模块 -->
+        <div id="aes-tool" class="tool-panel">
+            <div class="card">
+                <div class="card-title">🔒 AES 本地多重加解密</div>
+                <div class="form-group">
+                    <label>密钥 (16字节):</label>
+                    <input type="text" id="aes-key" value="1234567890123456">
+                </div>
+                <div class="form-group">
+                    <label>迭代轮数:</label>
+                    <input type="number" id="aes-rounds" min="1" max="1000" value="1">
+                </div>
+                <div class="form-group">
+                    <label>内容 (加密填明文，解密填 Hex 密文):</label>
+                    <textarea id="aes-text" rows="4" placeholder="在此输入内容..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-blue" onclick="handleAES('encrypt')">🔒 本地加密</button>
+                    <button class="btn-green" onclick="handleAES('decrypt')">🔓 本地解密</button>
+                </div>
+                <div id="aes-res-box" class="res-box" style="display:none;">
+                    <div id="aes-res-title" class="res-title"></div>
+                    <code id="aes-res-content"></code>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // -------------------------------------------------------------------
-        // 1. AES 核心逻辑
-        // -------------------------------------------------------------------
+        // 菜单切换逻辑
+        function switchTool(toolId, element) {
+            document.querySelectorAll('.tool-panel').forEach(panel => panel.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+            document.getElementById(toolId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // AES 逻辑
         class LocalAES {
             constructor(keyStr) {
                 const encoder = new TextEncoder();
@@ -233,30 +206,26 @@
             }
         }
 
-        // -------------------------------------------------------------------
-        // 2. URL 编解码逻辑
-        // -------------------------------------------------------------------
+        // URL 逻辑
         function handleURL(action) {
             const inputArea = document.getElementById('url-text').value;
             const resBox = document.getElementById('url-res-box');
             const resTitle = document.getElementById('url-res-title');
             const resContent = document.getElementById('url-res-content');
 
-            if (!inputArea) return alert("请输入需要编解码的内容");
+            if (!inputArea) return alert("请输入内容");
 
             try {
                 if (action === 'encode') {
-                    const encoded = encodeURIComponent(inputArea);
                     resTitle.innerText = "🔗 URL 编码结果:";
-                    resContent.innerText = encoded;
+                    resContent.innerText = encodeURIComponent(inputArea);
                 } else {
-                    const decoded = decodeURIComponent(inputArea);
                     resTitle.innerText = "🔓 URL 解码结果:";
-                    resContent.innerText = decoded;
+                    resContent.innerText = decodeURIComponent(inputArea);
                 }
                 resBox.style.display = 'block';
             } catch (err) {
-                alert("URL 处理失败（请检查是否为非法的 URL 编码格式）: " + err.message);
+                alert("URL 处理失败: " + err.message);
             }
         }
     </script>
