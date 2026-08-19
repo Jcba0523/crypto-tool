@@ -3,56 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>零日志 / 本地纯前端加解密工具</title>
+    <title>纯前端多功能安全工具箱</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 550px; margin: 40px auto; padding: 20px; background-color: #f9f9f9; }
-        .card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
-        h2 { margin-top: 0; color: #333; font-size: 20px; }
-        .privacy-badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 12px; }
-        .form-group { margin-top: 14px; }
-        label { font-size: 14px; font-weight: bold; color: #444; display: block; margin-bottom: 6px; }
-        input, textarea, button { width: 100%; padding: 10px; box-sizing: border-box; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        button { border: none; cursor: pointer; font-weight: bold; }
-        .btn-encrypt { background-color: #0070f3; color: white; }
-        .btn-decrypt { background-color: #10b981; color: white; }
-        .res-box { margin-top: 20px; background: #eef2ff; padding: 14px; border-radius: 4px; border: 1px solid #c7d2fe; word-break: break-all; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .privacy-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-top: 14px;
+        }
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+            display: block;
+            margin-bottom: 6px;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        button {
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-blue {
+            background-color: #0070f3;
+            color: white;
+        }
+        .btn-blue:hover {
+            background-color: #0051a2;
+        }
+        .btn-green {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-green:hover {
+            background-color: #059669;
+        }
+        .res-box {
+            margin-top: 16px;
+            background: #eef2ff;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #c7d2fe;
+            word-break: break-all;
+        }
+        .res-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #1e40af;
+            font-size: 13px;
+        }
+        code {
+            font-family: monospace;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 
+    <div class="privacy-badge">🛡️ 纯客户端计算：所有数据仅在浏览器内存中处理，绝不上传任何服务器</div>
+
+    <!-- 模块 1：AES 加解密 -->
     <div class="card">
-        <h2>🔒 AES 本地加解密工具</h2>
-        <div class="privacy-badge">🛡️ 纯客户端计算：所有数据仅保留在当前浏览器内存中</div>
+        <h2>🔒 AES 本地加解密</h2>
         
         <div class="form-group">
-            <label for="key">密钥 (16字节):</label>
-            <input type="text" id="key" value="1234567890123456">
+            <label for="aes-key">密钥 (16字节):</label>
+            <input type="text" id="aes-key" value="1234567890123456">
         </div>
 
         <div class="form-group">
-            <label for="rounds">迭代轮数:</label>
-            <input type="number" id="rounds" min="1" max="1000" value="1">
+            <label for="aes-rounds">迭代轮数:</label>
+            <input type="number" id="aes-rounds" min="1" max="1000" value="1">
         </div>
 
         <div class="form-group">
-            <label for="text">处理内容:</label>
-            <textarea id="text" rows="4" placeholder="加密填明文，解密填 Hex..."></textarea>
+            <label for="aes-text">内容 (加密填明文，解密填 Hex 密文):</label>
+            <textarea id="aes-text" rows="3" placeholder="在此输入内容..."></textarea>
         </div>
 
         <div class="btn-group">
-            <button class="btn-encrypt" onclick="handleAction('encrypt')">🔒 本地加密</button>
-            <button class="btn-decrypt" onclick="handleAction('decrypt')">🔓 本地解密</button>
+            <button class="btn-blue" onclick="handleAES('encrypt')">🔒 本地加密</button>
+            <button class="btn-green" onclick="handleAES('decrypt')">🔓 本地解密</button>
         </div>
 
-        <div id="resultBox" class="res-box" style="display:none;">
-            <div id="resTitle" style="font-weight:bold; margin-bottom:6px;"></div>
-            <code id="resContent"></code>
+        <div id="aes-res-box" class="res-box" style="display:none;">
+            <div id="aes-res-title" class="res-title"></div>
+            <code id="aes-res-content"></code>
+        </div>
+    </div>
+
+    <!-- 模块 2：URL 编解码 -->
+    <div class="card">
+        <h2>🌐 URL 编码 / 解码</h2>
+        
+        <div class="form-group">
+            <label for="url-text">内容 (输入需要 Encode 或 Decode 的字符串):</label>
+            <textarea id="url-text" rows="3" placeholder="例如: https://example.com/search?q=测试数据"></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-blue" onclick="handleURL('encode')">🔗 URL 编码 (Encode)</button>
+            <button class="btn-green" onclick="handleURL('decode')">🔓 URL 解码 (Decode)</button>
+        </div>
+
+        <div id="url-res-box" class="res-box" style="display:none;">
+            <div id="url-res-title" class="res-title"></div>
+            <code id="url-res-content"></code>
         </div>
     </div>
 
     <script>
-        // 纯前端本地加密算法类
+        // -------------------------------------------------------------------
+        // 1. AES 核心逻辑
+        // -------------------------------------------------------------------
         class LocalAES {
             constructor(keyStr) {
                 const encoder = new TextEncoder();
@@ -86,53 +193,72 @@
             return bytes;
         }
 
-        function handleAction(action) {
-    const keyStr = document.getElementById('key').value;
-    const rounds = parseInt(document.getElementById('rounds').value) || 1;
-    const inputArea = document.getElementById('text').value;
-    
-    const resultBox = document.getElementById('resultBox');
-    const resTitle = document.getElementById('resTitle');
-    const resContent = document.getElementById('resContent');
+        function handleAES(action) {
+            const keyStr = document.getElementById('aes-key').value;
+            const rounds = parseInt(document.getElementById('aes-rounds').value) || 1;
+            const inputArea = document.getElementById('aes-text').value;
+            
+            const resBox = document.getElementById('aes-res-box');
+            const resTitle = document.getElementById('aes-res-title');
+            const resContent = document.getElementById('aes-res-content');
 
-    if (!inputArea) return alert("请输入内容");
+            if (!inputArea) return alert("请输入内容");
 
-    try {
-        const encoder = new TextEncoder();
-        const decoder = new TextDecoder();
+            try {
+                const encoder = new TextEncoder();
+                const decoder = new TextDecoder();
 
-        if (action === 'encrypt') {
-            let currentData = encoder.encode(inputArea);
-
-            // 动态迭代：每一轮使用由上一轮结果派生/动态变化的 Key，避免异或抵消
-            for (let i = 0; i < rounds; i++) {
-                // 将当前轮次 i 混入 key 中，确保每一轮的加密密钥都不一样
-                const dynamicKey = `${keyStr}_round_${i}`;
-                const aes = new LocalAES(dynamicKey);
-                currentData = aes.transform(currentData);
+                if (action === 'encrypt') {
+                    let currentData = encoder.encode(inputArea);
+                    for (let i = 0; i < rounds; i++) {
+                        const dynamicKey = `${keyStr}_round_${i}`;
+                        const aes = new LocalAES(dynamicKey);
+                        currentData = aes.transform(currentData);
+                    }
+                    resTitle.innerText = `🔒 AES 加密成功 (迭代 ${rounds} 轮):`;
+                    resContent.innerText = bytesToHex(currentData);
+                } else {
+                    let currentData = hexToBytes(inputArea);
+                    for (let i = rounds - 1; i >= 0; i--) {
+                        const dynamicKey = `${keyStr}_round_${i}`;
+                        const aes = new LocalAES(dynamicKey);
+                        currentData = aes.transform(currentData);
+                    }
+                    resTitle.innerText = `🔓 AES 解密成功:`;
+                    resContent.innerText = decoder.decode(currentData);
+                }
+                resBox.style.display = 'block';
+            } catch (err) {
+                alert("处理失败: " + err.message);
             }
-
-            resTitle.innerText = `🔒 加密成功 (已迭代 ${rounds} 轮):`;
-            resContent.innerText = bytesToHex(currentData);
-
-        } else {
-            let currentData = hexToBytes(inputArea);
-
-            // 解密：必须完全按照逆序 (从 rounds-1 倒推到 0) 依次解密
-            for (let i = rounds - 1; i >= 0; i--) {
-                const dynamicKey = `${keyStr}_round_${i}`;
-                const aes = new LocalAES(dynamicKey);
-                currentData = aes.transform(currentData);
-            }
-
-            resTitle.innerText = `🔓 解密成功:`;
-            resContent.innerText = decoder.decode(currentData);
         }
-        resultBox.style.display = 'block';
-    } catch (err) {
-        alert("处理失败，请检查密文或密钥是否正确: " + err.message);
-    }
-}
+
+        // -------------------------------------------------------------------
+        // 2. URL 编解码逻辑
+        // -------------------------------------------------------------------
+        function handleURL(action) {
+            const inputArea = document.getElementById('url-text').value;
+            const resBox = document.getElementById('url-res-box');
+            const resTitle = document.getElementById('url-res-title');
+            const resContent = document.getElementById('url-res-content');
+
+            if (!inputArea) return alert("请输入需要编解码的内容");
+
+            try {
+                if (action === 'encode') {
+                    const encoded = encodeURIComponent(inputArea);
+                    resTitle.innerText = "🔗 URL 编码结果:";
+                    resContent.innerText = encoded;
+                } else {
+                    const decoded = decodeURIComponent(inputArea);
+                    resTitle.innerText = "🔓 URL 解码结果:";
+                    resContent.innerText = decoded;
+                }
+                resBox.style.display = 'block';
+            } catch (err) {
+                alert("URL 处理失败（请检查是否为非法的 URL 编码格式）: " + err.message);
+            }
+        }
     </script>
 </body>
 </html>
