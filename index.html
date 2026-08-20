@@ -7,11 +7,11 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* 页面整体 Flex 布局，实现水平和垂直居中 */
+        /* 页面背景：淡蓝灰色，整体屏幕居中 */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: #f8fafc; 
-            color: #334155; 
+            background-color: #f0f6ff; 
+            color: #1e293b; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -19,83 +19,87 @@
             padding: 20px;
         }
 
-        /* 主容器居中卡片化 */
+        /* 主容器：固定默认尺寸 1600px * 900px，自适应小屏幕 */
         .app-container {
             display: flex;
-            width: 100%;
-            max-width: 900px;
-            height: 600px;
+            width: 1600px;
+            height: 900px;
+            max-width: 100%;
+            max-height: 100vh;
             background: #ffffff;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid #dbeafe;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.08), 0 8px 10px -6px rgba(37, 99, 235, 0.03);
             overflow: hidden;
         }
 
-        /* 左侧边栏 */
+        /* 左侧边栏：蓝白配色的浅色背景 */
         .sidebar { 
-            width: 240px; 
+            width: 280px; 
             background: #f8fafc; 
             border-right: 1px solid #e2e8f0; 
             display: flex; 
             flex-direction: column; 
-            padding: 24px 0; 
+            padding: 28px 0; 
             flex-shrink: 0; 
         }
         .sidebar-title { 
-            font-size: 11px; 
+            font-size: 12px; 
             font-weight: 700; 
-            color: #94a3b8; 
-            padding: 0 24px 12px; 
+            color: #3b82f6; 
+            padding: 0 28px 16px; 
             text-transform: uppercase; 
             letter-spacing: 0.5px; 
         }
         
-        .menu-category { margin-bottom: 20px; }
-        .menu-header { font-size: 14px; font-weight: 600; color: #475569; padding: 8px 24px; display: flex; align-items: center; gap: 8px; }
-        .menu-item { display: flex; align-items: center; padding: 8px 24px 8px 40px; font-size: 13px; color: #64748b; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }
-        .menu-item::before { content: "-"; margin-right: 6px; color: #94a3b8; }
-        .menu-item:hover { color: #0f172a; background: #f1f5f9; }
-        .menu-item.active { color: #10b981; font-weight: 600; background: #ecfdf5; }
-        .menu-item.active::before { color: #10b981; }
+        .menu-category { margin-bottom: 24px; }
+        .menu-header { font-size: 14px; font-weight: 600; color: #1e3a8a; padding: 8px 28px; display: flex; align-items: center; gap: 8px; }
+        .menu-item { display: flex; align-items: center; padding: 10px 28px 10px 48px; font-size: 14px; color: #475569; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }
+        .menu-item::before { content: "-"; margin-right: 8px; color: #93c5fd; }
+        .menu-item:hover { color: #1d4ed8; background: #eff6ff; }
+        
+        /* 选中菜单项：深蓝色字体 + 浅蓝背景 */
+        .menu-item.active { color: #2563eb; font-weight: 600; background: #dbeafe; border-right: 3px solid #2563eb; }
+        .menu-item.active::before { color: #2563eb; }
 
         /* 右侧主内容区 */
-        .main-content { flex: 1; padding: 28px 32px; overflow-y: auto; display: flex; flex-direction: column; }
-        .privacy-banner { display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; color: #0369a1; font-size: 12px; padding: 6px 12px; border-radius: 6px; font-weight: 600; margin-bottom: 20px; width: fit-content; }
+        .main-content { flex: 1; padding: 36px 48px; overflow-y: auto; display: flex; flex-direction: column; }
+        .privacy-banner { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 13px; padding: 8px 14px; border-radius: 6px; font-weight: 600; margin-bottom: 24px; width: fit-content; }
         
-        .card-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .card-title { font-size: 20px; font-weight: 600; color: #1e3a8a; margin-bottom: 20px; border-bottom: 2px solid #eff6ff; padding-bottom: 12px; }
         
         .tool-panel { display: none; }
         .tool-panel.active { display: block; }
 
-        .form-group { margin-top: 14px; }
+        .form-group { margin-top: 18px; }
         
-        /* 带复制按钮的 Label 头 */
-        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        label { font-size: 13px; font-weight: 600; color: #475569; }
+        /* 标签行及微型复制按钮 */
+        .label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        label { font-size: 14px; font-weight: 600; color: #1e40af; }
         
-        /* 微型复制按钮 */
-        .btn-copy { font-size: 11px; padding: 2px 8px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; transition: all 0.2s; width: auto; }
-        .btn-copy:hover { background: #e2e8f0; color: #0f172a; }
+        .btn-copy { font-size: 12px; padding: 4px 10px; background: #f0f6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 4px; cursor: pointer; transition: all 0.2s; width: auto; font-weight: 500; }
+        .btn-copy:hover { background: #dbeafe; color: #1d4ed8; }
 
-        input, textarea { width: 100%; padding: 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-family: inherit; }
-        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.1); }
+        input, textarea { width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-family: inherit; background: #ffffff; color: #1e293b; }
+        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         textarea { resize: vertical; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 18px; }
-        .btn-action { border: none; cursor: pointer; font-weight: 600; padding: 10px; font-size: 13px; border-radius: 6px; transition: background 0.2s; width: 100%; }
-        .btn-blue { background-color: #2563eb; color: white; }
-        .btn-blue:hover { background-color: #1d4ed8; }
-        .btn-green { background-color: #10b981; color: white; }
-        .btn-green:hover { background-color: #059669; }
+        .btn-group { display: flex; gap: 14px; margin-top: 24px; }
+        .btn-action { border: none; cursor: pointer; font-weight: 600; padding: 12px; font-size: 14px; border-radius: 8px; transition: all 0.2s; width: 100%; }
+        
+        /* 主按钮：深蓝色 / 辅助按钮：浅蓝色 */
+        .btn-primary { background-color: #2563eb; color: #ffffff; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #3b82f6; color: #ffffff; }
+        .btn-secondary:hover { background-color: #2563eb; }
 
-        .res-box { margin-top: 16px; background: #f8fafc; padding: 12px 14px; border-radius: 6px; border: 1px solid #e2e8f0; word-break: break-all; }
-        code { font-family: monospace; font-size: 13px; color: #0f172a; white-space: pre-wrap; }
+        .res-box { margin-top: 20px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #dbeafe; word-break: break-all; }
+        code { font-family: monospace; font-size: 14px; color: #0f172a; white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
-    <!-- 居中主容器 -->
+    <!-- 1600px * 900px 居中主容器 -->
     <div class="app-container">
         
         <!-- 左侧菜单 -->
@@ -132,17 +136,17 @@
                         <label for="url-text">输入内容:</label>
                         <button class="btn-copy" onclick="copyText('url-text', this)">复制输入</button>
                     </div>
-                    <textarea id="url-text" rows="4" placeholder="例如: https://example.com/search?q=测试"></textarea>
+                    <textarea id="url-text" rows="6" placeholder="例如: https://example.com/search?q=测试"></textarea>
                 </div>
                 
                 <div class="btn-group">
-                    <button class="btn-action btn-blue" onclick="handleURL('encode')">🔗 URL 编码 (Encode)</button>
-                    <button class="btn-action btn-green" onclick="handleURL('decode')">🔓 URL 解码 (Decode)</button>
+                    <button class="btn-action btn-primary" onclick="handleURL('encode')">🔗 URL 编码 (Encode)</button>
+                    <button class="btn-action btn-secondary" onclick="handleURL('decode')">🔓 URL 解码 (Decode)</button>
                 </div>
 
                 <div id="url-res-box" class="res-box" style="display:none;">
                     <div class="label-row">
-                        <label id="url-res-title" style="color: #334155;"></label>
+                        <label id="url-res-title" style="color: #1e3a8a;"></label>
                         <button class="btn-copy" onclick="copyText('url-res-content', this)">复制结果</button>
                     </div>
                     <code id="url-res-content"></code>
@@ -168,17 +172,17 @@
                         <label for="aes-text">输入内容 (加密填明文，解密填 Hex 密文):</label>
                         <button class="btn-copy" onclick="copyText('aes-text', this)">复制输入</button>
                     </div>
-                    <textarea id="aes-text" rows="3" placeholder="在此输入内容..."></textarea>
+                    <textarea id="aes-text" rows="5" placeholder="在此输入内容..."></textarea>
                 </div>
                 
                 <div class="btn-group">
-                    <button class="btn-action btn-blue" onclick="handleAES('encrypt')">🔒 本地加密</button>
-                    <button class="btn-action btn-green" onclick="handleAES('decrypt')">🔓 本地解密</button>
+                    <button class="btn-action btn-primary" onclick="handleAES('encrypt')">🔒 本地加密</button>
+                    <button class="btn-action btn-secondary" onclick="handleAES('decrypt')">🔓 本地解密</button>
                 </div>
 
                 <div id="aes-res-box" class="res-box" style="display:none;">
                     <div class="label-row">
-                        <label id="aes-res-title" style="color: #334155;"></label>
+                        <label id="aes-res-title" style="color: #1e3a8a;"></label>
                         <button class="btn-copy" onclick="copyText('aes-res-content', this)">复制结果</button>
                     </div>
                     <code id="aes-res-content"></code>
@@ -193,7 +197,6 @@
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            // 区分输入框 (value) 和 结果节点 (innerText)
             const textToCopy = element.value !== undefined ? element.value : element.innerText;
 
             if (!textToCopy) {
@@ -204,7 +207,7 @@
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = btnElement.innerText;
                 btnElement.innerText = "✓ 已复制";
-                btnElement.style.color = "#10b981";
+                btnElement.style.color = "#1d4ed8";
                 
                 setTimeout(() => {
                     btnElement.innerText = originalText;
