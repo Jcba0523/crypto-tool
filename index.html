@@ -86,6 +86,7 @@
         .key-display { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 12px; word-break: break-all; max-height: 120px; overflow-y: auto; color: var(--text-secondary); margin-top: 6px; position: relative; }
         .rsa-section { border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; margin-top: 18px; }
         .rsa-section-title { font-size: 15px; font-weight: 600; color: var(--primary-color); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+        
         /* Password Generator Styles */
         .pwd-setting-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
         .pwd-label-text { font-size: 15px; color: var(--text-secondary); width: 40px; }
@@ -281,6 +282,8 @@
                 <label class="pwd-toggle-wrapper" for="useNumbers"><span class="pwd-toggle-label">数字 (0-9)</span><div class="pwd-switch"><input type="checkbox" id="useNumbers" checked><span class="pwd-slider"></span></div></label>
                 <label class="pwd-toggle-wrapper" for="useSymbols"><span class="pwd-toggle-label">符号 (!@#)</span><div class="pwd-switch"><input type="checkbox" id="useSymbols" checked><span class="pwd-slider"></span></div></label>
                 <label class="pwd-toggle-wrapper" for="excludeAmbiguous"><span class="pwd-toggle-label">排除易混淆 (0O1l)</span><div class="pwd-switch"><input type="checkbox" id="excludeAmbiguous"><span class="pwd-slider"></span></div></label>
+                <!-- 新增：保存历史密码开关 -->
+                <label class="pwd-toggle-wrapper" for="saveHistoryToggle"><span class="pwd-toggle-label">保存历史记录</span><div class="pwd-switch"><input type="checkbox" id="saveHistoryToggle" checked><span class="pwd-slider"></span></div></label>
             </div>
             <span class="pwd-result-label">生成结果</span>
             <div class="pwd-output-box" id="passwordOutput">Loading...</div>
@@ -522,7 +525,7 @@ async function pasteToDecInput() {
 // ==================== 密码生成器 ====================
 const LOWER="abcdefghijklmnopqrstuvwxyz", UPPER="ABCDEFGHIJKLMNOPQRSTUVWXYZ", NUMS="0123456789", SYMS="!@%^*()_-,./:;[]{}~", AMBIGUOUS="0O1lI", MAX_HISTORY=10;
 const lengthSlider=$('lengthSlider'), lengthValue=$('lengthValue');
-const useNumbers=$('useNumbers'), useSymbols=$('useSymbols'), excludeAmbiguous=$('excludeAmbiguous');
+const useNumbers=$('useNumbers'), useSymbols=$('useSymbols'), excludeAmbiguous=$('excludeAmbiguous'), saveHistoryToggle=$('saveHistoryToggle');
 const passwordOutput=$('passwordOutput'), refreshBtn=$('refreshBtn'), copyPwdBtn=$('copyBtn');
 const themeToggle=$('themeToggle'), strengthBar=$('strengthBar'), strengthText=$('strengthText');
 const historyToggle=$('historyToggle'), historyList=$('historyList');
@@ -547,7 +550,12 @@ function generatePassword(){
     for(let i=0;i<len-req.length;i++) filled.push(randChar(full));
     
     const pwd=shuffle(filled).join('');
-    renderPwd(pwd); checkStr(pwd,pools.length); addHist(pwd);
+    renderPwd(pwd); checkStr(pwd,pools.length); 
+    
+    // 判断是否保存历史记录
+    if (saveHistoryToggle.checked) {
+        addHist(pwd);
+    }
 }
 
 function renderPwd(pwd){
