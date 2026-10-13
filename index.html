@@ -155,7 +155,7 @@
         <div class="menu-category">
             <div class="menu-header"><span>🔑</span> 加密与解密</div>
             <div class="menu-item" onclick="switchTool('sym-tool',this)">对称加密 (AES-GCM)</div>
-            <div class="menu-item" onclick="switchTool('asym-tool',this)">非对称加密 (RSA 混合加密)</div>
+            <div class="menu-item" onclick="switchTool('asym-tool',this)">非对称加密 (RSA 混合循环)</div>
         </div>
         <div class="menu-category">
             <div class="menu-header"><span>🛡️</span> 密码管理</div>
@@ -188,11 +188,15 @@
 
         <!-- 对称加密 AES-GCM -->
         <div id="sym-tool" class="tool-panel">
-            <div class="card-title">🔒 对称加密 (AES-GCM 密码)</div>
-            <div class="info-box blue"><span class="icon">ℹ️</span><span>采用标准 <strong>AES-GCM</strong> 加密算法。支持自定义密钥，通过 PBKDF2 算法安全派生密钥，确保工业级安全。</span></div>
+            <div class="card-title">🔒 对称加密 (AES-GCM 循环加密)</div>
+            <div class="info-box blue"><span class="icon">ℹ️</span><span>支持通过设置<strong>迭代轮数</strong>进行多次循环加密，提升安全性。解密时需保持相同的密钥与轮数。</span></div>
             <div class="form-group">
                 <label for="sym-key">🔑 密钥 (Key):</label>
                 <input type="text" id="sym-key" value="MySecretKey12345" placeholder="加密与解密使用同一密钥">
+            </div>
+            <div class="form-group">
+                <label for="sym-rounds">🔄 迭代轮数 (Rounds):</label>
+                <input type="number" id="sym-rounds" min="1" max="100" value="1">
             </div>
             <div class="form-group">
                 <div class="label-row"><label for="sym-text">输入内容:</label><button class="btn-copy" onclick="copyText('sym-text',this)">复制输入</button></div>
@@ -208,10 +212,15 @@
             </div>
         </div>
 
-        <!-- 非对称加密 RSA 混合加密 -->
+        <!-- 非对称加密 RSA 混合循环加密 -->
         <div id="asym-tool" class="tool-panel">
-            <div class="card-title">🔐 非对称加密 (RSA-OAEP + AES-GCM 混合加密)</div>
-            <div class="info-box blue"><span class="icon">ℹ️</span><span>采用工业级 <strong>混合加密</strong> 方案：对明文使用随机 AES-256-GCM 密钥加密，再用 RSA-2048 公钥加密 AES 密钥[cite: 1]。完美突破 RSA 的单次长度限制，且兼具 RSA 的非对称安全优势[cite: 1]。</span></div>
+            <div class="card-title">🔐 非对称加密 (RSA 混合循环加密)</div>
+            <div class="info-box blue"><span class="icon">ℹ️</span><span>采用 <strong>混合循环加密</strong> 方案：支持设置迭代轮数，连续多次包裹加密，提供更强的安全层级[cite: 1]。</span></div>
+
+            <div class="form-group" style="margin-top:10px">
+                <label for="rsa-rounds">🔄 迭代轮数 (Rounds):</label>
+                <input type="number" id="rsa-rounds" min="1" max="50" value="1">
+            </div>
 
             <!-- 密钥管理区 -->
             <div class="rsa-section">
@@ -246,7 +255,7 @@
                     <div class="label-row"><label for="rsa-enc-input">明文 (无长度限制):</label><span id="rsa-enc-len" style="font-size:12px;color:var(--text-secondary)">0 bytes</span></div>
                     <textarea id="rsa-enc-input" rows="4" placeholder="输入要加密的任意长度明文..." oninput="updateRSALen()"></textarea>
                 </div>
-                <button class="btn-action btn-primary" onclick="rsaEncrypt()">🔒 使用公钥加密</button>
+                <button class="btn-action btn-primary" onclick="rsaEncrypt()">🔒 使用公钥循环加密</button>
                 <div id="rsa-enc-error" class="error-msg"></div>
                 <div id="rsa-enc-res" class="res-box" style="display:none">
                     <div class="label-row"><label style="color:var(--primary-color)">密文 (Base64):</label><button class="btn-copy" onclick="copyText('rsa-enc-output',this)">复制密文</button></div>
@@ -261,7 +270,7 @@
                     <div class="label-row"><label for="rsa-dec-input">密文 (Base64):</label><button class="btn-copy" onclick="pasteToDecInput()">从剪贴板粘贴</button></div>
                     <textarea id="rsa-dec-input" rows="4" placeholder="粘贴 Base64 密文..."></textarea>
                 </div>
-                <button class="btn-action btn-secondary" onclick="rsaDecrypt()">🔓 使用私钥解密</button>
+                <button class="btn-action btn-secondary" onclick="rsaDecrypt()">🔓 使用私钥循环解密</button>
                 <div id="rsa-dec-error" class="error-msg"></div>
                 <div id="rsa-dec-res" class="res-box" style="display:none">
                     <div class="label-row"><label style="color:var(--primary-color)">解密明文:</label><button class="btn-copy" onclick="copyText('rsa-dec-output',this)">复制明文</button></div>
@@ -282,7 +291,6 @@
                 <label class="pwd-toggle-wrapper" for="useNumbers"><span class="pwd-toggle-label">数字 (0-9)</span><div class="pwd-switch"><input type="checkbox" id="useNumbers" checked><span class="pwd-slider"></span></div></label>
                 <label class="pwd-toggle-wrapper" for="useSymbols"><span class="pwd-toggle-label">符号 (!@#)</span><div class="pwd-switch"><input type="checkbox" id="useSymbols" checked><span class="pwd-slider"></span></div></label>
                 <label class="pwd-toggle-wrapper" for="excludeAmbiguous"><span class="pwd-toggle-label">排除易混淆 (0O1l)</span><div class="pwd-switch"><input type="checkbox" id="excludeAmbiguous"><span class="pwd-slider"></span></div></label>
-                <!-- 新增：保存历史密码开关 -->
                 <label class="pwd-toggle-wrapper" for="saveHistoryToggle"><span class="pwd-toggle-label">保存历史记录</span><div class="pwd-switch"><input type="checkbox" id="saveHistoryToggle" checked><span class="pwd-slider"></span></div></label>
             </div>
             <span class="pwd-result-label">生成结果</span>
@@ -339,7 +347,7 @@ function handleURL(action) {
     } catch(e) { alert("URL 处理失败: " + e.message); }
 }
 
-// ==================== 对称加密 AES-GCM (Web Crypto API) ====================
+// ==================== 对称加密 AES-GCM (支持循环迭代) ====================
 function bytesToHex(b) { return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join(''); }
 function hexToBytes(h) { const c = h.replace(/\s+/g,''); const b = new Uint8Array(c.length/2); for(let i=0;i<c.length;i+=2) b[i/2]=parseInt(c.substr(i,2),16); return b; }
 
@@ -354,38 +362,47 @@ async function deriveAESKey(password, salt) {
 
 async function handleSym(action) {
     const password = $('sym-key').value; if (!password) return alert("请输入密钥");
+    const rounds = parseInt($('sym-rounds').value) || 1;
     const input = $('sym-text').value; if (!input) return alert("请输入内容");
     
     try {
         const enc = new TextEncoder(), dec = new TextDecoder();
         if (action === 'encrypt') {
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            const iv = crypto.getRandomValues(new Uint8Array(12));
-            const key = await deriveAESKey(password, salt);
-            const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(input));
-            
-            const result = new Uint8Array(salt.length + iv.length + cipher.byteLength);
-            result.set(salt, 0); result.set(iv, 16); result.set(new Uint8Array(cipher), 28);
-
-            $('sym-res-title').innerText = "🔒 AES-GCM 加密成功:";
-            $('sym-res-content').innerText = bytesToHex(result);
+            let currentData = enc.encode(input);
+            for (let i = 0; i < rounds; i++) {
+                const salt = crypto.getRandomValues(new Uint8Array(16));
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const key = await deriveAESKey(`${password}_round_${i}`, salt);
+                const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, currentData);
+                
+                const result = new Uint8Array(salt.length + iv.length + cipher.byteLength);
+                result.set(salt, 0); result.set(iv, 16); result.set(new Uint8Array(cipher), 28);
+                // 将当前密文转换为 Hex 字符串，作为下一轮的输入
+                const hexStr = bytesToHex(result);
+                currentData = enc.encode(hexStr);
+            }
+            $('sym-res-title').innerText = `🔒 AES-GCM 循环加密成功 (迭代 ${rounds} 轮):`;
+            $('sym-res-content').innerText = new TextDecoder().decode(currentData);
         } else {
-            const data = hexToBytes(input);
-            if (data.length < 28) throw new Error("密文格式无效");
-            const salt = data.slice(0, 16);
-            const iv = data.slice(16, 28);
-            const cipher = data.slice(28);
-            const key = await deriveAESKey(password, salt);
-            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
-            
-            $('sym-res-title').innerText = "🔓 解密成功:";
-            $('sym-res-content').innerText = dec.decode(decrypted);
+            let currentHex = input.trim();
+            for (let i = rounds - 1; i >= 0; i--) {
+                const data = hexToBytes(currentHex);
+                if (data.length < 28) throw new Error("密文格式无效");
+                const salt = data.slice(0, 16);
+                const iv = data.slice(16, 28);
+                const cipher = data.slice(28);
+                const key = await deriveAESKey(`${password}_round_${i}`, salt);
+                const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+                currentHex = dec.decode(decrypted);
+            }
+            $('sym-res-title').innerText = `🔓 循环解密成功 (还原明文):`;
+            $('sym-res-content').innerText = currentHex;
         }
         $('sym-res-box').style.display = 'block';
-    } catch(e) { alert("处理失败 (密钥有误或密文已损坏): " + e.message); }
+    } catch(e) { alert("处理失败 (密钥有误、轮数不匹配或密文已损坏): " + e.message); }
 }
 
-// ==================== 混合加密方案 (RSA-OAEP + AES-GCM) ====================
+// ==================== 非对称加密 RSA 混合循环加密 ====================
 let rsaPubKey = null, rsaPrivKey = null;
 
 function pemToArrayBuffer(pem) {
@@ -435,7 +452,7 @@ async function rsaImportKeys() {
 }
 
 function copyRSAKey(type) {
-    const el = type === 'pub' ? $('rsa-pub-display') : $('rsa-priv-display');
+    const el = type === 'pub' ? $('rsa-pub-display') :$('rsa-priv-display');
     const txt = el.innerText;
     if (!txt || txt.includes("点击下方")) return alert("请先生成或导入密钥");
     navigator.clipboard.writeText(txt).then(() => alert("✓ 已复制到剪贴板"));
@@ -447,12 +464,11 @@ function updateRSALen() {
     $('rsa-enc-len').innerText = `${bytes} bytes`;
 }
 
-// 核心混合加密算法[cite: 1]
-async function rsaHybridEncrypt(publicKey, plaintext) {
-    const enc = new TextEncoder();
+// 单次混合加密底层函数
+async function baseHybridEncrypt(publicKey, plaintextBytes) {
     const aesKey = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt"]);
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encryptedContent = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, enc.encode(plaintext));
+    const encryptedContent = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, plaintextBytes);
     const rawAesKey = await crypto.subtle.exportKey("raw", aesKey);
     const encryptedKey = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, publicKey, rawAesKey);
     
@@ -464,57 +480,75 @@ async function rsaHybridEncrypt(publicKey, plaintext) {
     result.set(new Uint8Array(encryptedKey), offset); offset += encryptedKey.byteLength;
     result.set(iv, offset); offset += iv.length;
     result.set(new Uint8Array(encryptedContent), offset);
-    
-    return btoa(String.fromCharCode(...result));
+    return result;
 }
 
-// 核心混合解密算法[cite: 1]
-async function rsaHybridDecrypt(privateKey, base64Data) {
-    const dec = new TextDecoder();
-    const bin = atob(base64Data);
-    const data = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i);
-    
-    const keyLen = new Uint32Array(data.buffer, 0, 1)[0];
+// 单次混合解密底层函数
+async function baseHybridDecrypt(privateKey, dataBytes) {
+    const keyLen = new Uint32Array(dataBytes.buffer, dataBytes.byteOffset, 1)[0];
     let offset = 4;
     
-    const encryptedKey = data.subarray(offset, offset + keyLen); offset += keyLen;
-    const iv = data.subarray(offset, offset + 12); offset += 12;
-    const encryptedContent = data.subarray(offset);
+    const encryptedKey = dataBytes.subarray(offset, offset + keyLen); offset += keyLen;
+    const iv = dataBytes.subarray(offset, offset + 12); offset += 12;
+    const encryptedContent = dataBytes.subarray(offset);
     
     const rawAesKey = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, privateKey, encryptedKey);
     const aesKey = await crypto.subtle.importKey("raw", rawAesKey, { name: "AES-GCM" }, false, ["decrypt"]);
-    const decryptedContent = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, encryptedContent);
-    
-    return dec.decode(decryptedContent);
+    return await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, encryptedContent);
+}
+
+// 循环混合加密
+async function rsaHybridEncryptLoop(publicKey, plaintext, rounds) {
+    let currentData = new TextEncoder().encode(plaintext);
+    for (let i = 0; i < rounds; i++) {
+        const encryptedBytes = await baseHybridEncrypt(publicKey, currentData);
+        // 将二进制密文转为 Base64 字符串作为下一轮的输入明文
+        const b64 = btoa(String.fromCharCode(...encryptedBytes));
+        currentData = new TextEncoder().encode(b64);
+    }
+    return new TextDecoder().decode(currentData);
+}
+
+// 循环混合解密
+async function rsaHybridDecryptLoop(privateKey, base64Data, rounds) {
+    let currentText = base64Data;
+    for (let i = rounds - 1; i >= 0; i--) {
+        const bin = atob(currentText);
+        const dataBytes = new Uint8Array(bin.length);
+        for (let j = 0; j < bin.length; j++) dataBytes[j] = bin.charCodeAt(j);
+        
+        const decryptedBytes = await baseHybridDecrypt(privateKey, dataBytes);
+        currentText = new TextDecoder().decode(decryptedBytes);
+    }
+    return currentText;
 }
 
 async function rsaEncrypt() {
-    const errEl = $('rsa-enc-error'); errEl.style.display = 'none';
-    $('rsa-enc-res').style.display = 'none';
+    const errEl = $('rsa-enc-error'); errEl.style.display = 'none';$('rsa-enc-res').style.display = 'none';
     if (!rsaPubKey) { errEl.innerText = "❌ 请先生成或导入公钥"; errEl.style.display = 'block'; return; }
     const plaintext = $('rsa-enc-input').value;
+    const rounds = parseInt($('rsa-rounds').value) || 1;
     if (!plaintext) { errEl.innerText = "❌ 请输入明文"; errEl.style.display = 'block'; return; }
     
     try {
-        const base64Result = await rsaHybridEncrypt(rsaPubKey, plaintext);
+        const base64Result = await rsaHybridEncryptLoop(rsaPubKey, plaintext, rounds);
         $('rsa-enc-output').innerText = base64Result;
         $('rsa-enc-res').style.display = 'block';
-    } catch(e) { errEl.innerText = "❌ 加密失败: " + e.message; errEl.style.display = 'block'; }
+    } catch(e) { errEl.innerText = "❌ 循环加密失败: " + e.message; errEl.style.display = 'block'; }
 }
 
 async function rsaDecrypt() {
-    const errEl = $('rsa-dec-error'); errEl.style.display = 'none';
-    $('rsa-dec-res').style.display = 'none';
+    const errEl = $('rsa-dec-error'); errEl.style.display = 'none';$('rsa-dec-res').style.display = 'none';
     if (!rsaPrivKey) { errEl.innerText = "❌ 请先生成或导入私钥"; errEl.style.display = 'block'; return; }
     const b64 = $('rsa-dec-input').value.trim();
+    const rounds = parseInt($('rsa-rounds').value) || 1;
     if (!b64) { errEl.innerText = "❌ 请输入 Base64 密文"; errEl.style.display = 'block'; return; }
     
     try {
-        const plaintext = await rsaHybridDecrypt(rsaPrivKey, b64);
+        const plaintext = await rsaHybridDecryptLoop(rsaPrivKey, b64, rounds);
         $('rsa-dec-output').innerText = plaintext;
         $('rsa-dec-res').style.display = 'block';
-    } catch(e) { errEl.innerText = "❌ 解密失败: 密文格式无效、密钥不匹配或数据已损坏\n" + e.message; errEl.style.display = 'block'; }
+    } catch(e) { errEl.innerText = "❌ 循环解密失败: 密文无效、轮数不匹配或密钥不正确\n" + e.message; errEl.style.display = 'block'; }
 }
 
 async function pasteToDecInput() {
@@ -552,7 +586,6 @@ function generatePassword(){
     const pwd=shuffle(filled).join('');
     renderPwd(pwd); checkStr(pwd,pools.length); 
     
-    // 判断是否保存历史记录
     if (saveHistoryToggle.checked) {
         addHist(pwd);
     }
